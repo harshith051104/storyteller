@@ -129,8 +129,3 @@ Open your browser at `http://127.0.0.1:7860`.
 - `media_engine.py`: Manages image/audio prompt generation.
 - `config.py`: Configuration constants.
 
----
-
-## 🛡️ License
-
-Research Preview.
