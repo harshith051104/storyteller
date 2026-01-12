@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+.venv_311/
+str/
+*.mp3
+*.png
+*.wav
+face_landmarker.task
+test_*.py
+download_model.py
+inspect_mp_path.py
+run_storyteller.bat
