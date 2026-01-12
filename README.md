@@ -1,6 +1,6 @@
-# 📖 Smart Cultural Storyteller 2.0
+# 📖 Smart Cultural Storyteller
 
-**Smart Cultural Storyteller 2.0** is a research-grade, interactive AI storytelling application that dynamically adapts to cultural themes, user choices, and even **facial emotions** in real-time.
+**Smart Cultural Storyteller** is a research-grade, interactive AI storytelling application that dynamically adapts to cultural themes, user choices, and even **facial emotions** in real-time.
 
 It moves beyond simple text generation by integrating **Dynamic Identity Generation**, **Cinematography**, **Moral Evaluation**, and **Privacy-Safe Emotion Detection** to create a deeply immersive experience.
 
