@@ -169,14 +169,14 @@ def continue_story_handler(user_choice, user_emotion_label, state):
 
 
 # Gradio Interface
-with gr.Blocks(title="Smart Cultural Storyteller 2.0") as demo:
+with gr.Blocks(title="Smart Cultural Storyteller") as demo:
     state = gr.State({})
     # State to hold background emotion detection
     emotion_state = gr.State("neutral")
     # State to hold last processing timestamp for throttling
     timer_state = gr.State(0.0)
 
-    gr.Markdown("# 📖 Smart Cultural Storyteller 2.0")
+    gr.Markdown("# 📖 Smart Cultural Storyteller")
     gr.Markdown("Research-Grade Interactive Storytelling with RAG, Cinematography, and Moral Agents.")
     
     with gr.Row():
