@@ -10,9 +10,5 @@ pypdf
 langchain-groq
 
 huggingface_hub
-chromadb
-langchain-chroma
-sentence-transformers
 mediapipe
 opencv-python
-langchain-huggingface

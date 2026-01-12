@@ -1,80 +1,48 @@
-import os
-import glob
-from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_core.documents import Document
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from config import MODEL_FAST
+from langchain_groq import ChatGroq
+from langchain_core.messages import SystemMessage, HumanMessage
 
 class CultureEngine:
-    def __init__(self, persist_dir="./chroma_db"):
-        self.persist_dir = persist_dir
-        self.embedding_function = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-        
-        # Initialize Vector Store
-        self.vector_store = Chroma(
-            persist_directory=self.persist_dir,
-            embedding_function=self.embedding_function,
-            collection_name="culture_packs"
-        )
-        self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=500,
-            chunk_overlap=50
-        )
+    def __init__(self):
+        # Use Fast model for quick context retrieval/generation
+        self.llm = ChatGroq(model=MODEL_FAST)
 
-    def load_culture_pack(self, file_path):
-        """Ingests a text file into the vector database."""
-        if not os.path.exists(file_path):
-            print(f"Error: File not found {file_path}")
-            return
-
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        # Create Document object
-        # We assume the filename implies the culture (e.g., indian_folklore.txt)
-        culture_name = os.path.basename(file_path).split(".")[0].replace("_", " ").title()
-        
-        doc = Document(
-            page_content=content,
-            metadata={"source": file_path, "culture": culture_name}
-        )
-
-        # Split and Add to DB
-        chunks = self.text_splitter.split_documents([doc])
-        self.vector_store.add_documents(chunks)
-        print(f"Successfully loaded {len(chunks)} chunks from {file_path} into ChromaDB.")
-
-    def search(self, query, k=3):
-        """Performs semantic search."""
-        results = self.vector_store.similarity_search(query, k=k)
-        return results
-
-    def get_context_string(self, query):
-        """Returns a formatted string of retrieved context."""
-        try:
-            docs = self.search(query)
-            if not docs:
-                return ""
-            
-            context_parts = []
-            for doc in docs:
-                context_parts.append(f"[Source: {doc.metadata.get('culture', 'Unknown')}]\n{doc.page_content}")
-            
-            return "\n\n".join(context_parts)
-        except Exception as e:
-            print(f"Culture Context Retrieval Failed: {e}")
+    def get_context_string(self, theme):
+        """
+        Dynamically generates a 'Knowledge Block' about the theme using the LLM.
+        """
+        if not theme:
             return ""
 
-# Helper to ingest all packs in data directory
-def ingest_all_packs(data_dir="./data/culture_packs"):
-    engine = CultureEngine()
-    files = glob.glob(os.path.join(data_dir, "*.txt"))
-    for f in files:
-        engine.load_culture_pack(f)
+        print(f"CultureEngine: Generatively recalling facts for '{theme}'...")
+        
+        system_prompt = (
+            "You are an expert Cultural Anthropologist and Mythologist with encyclopedic knowledge of world cultures, "
+            "folklore, and history. Your goal is to provide a concise, factual, and authentic 'Knowledge Block' "
+            "that a storyteller can use to ground their narrative."
+        )
+
+        user_prompt = (
+            f"Topic: {theme}\n\n"
+            "Provide 9-10 key authentic cultural elements, including:\n"
+            "1. Specific terminology (greetings, clothing, weapons, tools)\n"
+            "2. Key festivals or rituals\n"
+            "3. Mythological figures or legends\n"
+            "4. Social hierarchy or values\n\n"
+            "Format: A concise list or paragraph. Strictly factual and authentic. No preamble."
+        )
+
+        try:
+            messages = [
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=user_prompt)
+            ]
+            response = self.llm.invoke(messages)
+            return response.content
+        except Exception as e:
+            print(f"Culture Generation Failed: {e}")
+            return "General cultural knowledge applies."
 
 if __name__ == "__main__":
-    # Test Run
-    ingest_all_packs()
     ce = CultureEngine()
-    print("--- Test Search: 'Festival of Lights' ---")
-    print(ce.get_context_string("Festival of Lights"))
+    print(ce.get_context_string("Feudal Japan"))
