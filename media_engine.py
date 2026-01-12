@@ -5,27 +5,24 @@ import requests
 import base64
 import pyttsx3
 from cinematography_engine import CinematographyEngine
+from logger_config import get_logger
+
+logger = get_logger()
 
 class MediaEngine:
     def __init__(self):
         # Hugging Face token check
         self.hf_token = os.getenv("HUGGINGFACE_API_TOKEN")
         if not self.hf_token:
-            print("WARNING: HUGGINGFACE_API_TOKEN not found. Image generation disabled.")
-
-        if not self.hf_token:
-            print("WARNING: HUGGINGFACE_API_TOKEN not found. Image generation disabled.")
+            logger.warning("HUGGINGFACE_API_TOKEN not found. Image generation disabled.")
 
         # pyttsx3 is initialized per-call to avoid threading issues on Windows/Gradio
-
-
-
 
         # Initialize Cinematography Engine
         try:
             self.cine_engine = CinematographyEngine()
         except Exception as e:
-            print(f"Failed to init CinematographyEngine: {e}")
+            logger.error(f"Failed to init CinematographyEngine: {e}")
             self.cine_engine = None
 
     # ---------------- IMAGE GENERATION ----------------
@@ -86,18 +83,15 @@ class MediaEngine:
             with open(output_path, "wb") as f:
                 f.write(response.content)
 
-            print(f"SUCCESS: Image saved → {output_path}")
+            logger.info(f"Image saved → {output_path}")
             return output_path, "image"
 
         except Exception as e:
-            error_msg = (
-                f"Image generation failed: {e}\n"
-                f"{traceback.format_exc()}"
-            )
-            print(error_msg)
+            logger.error(f"Image generation failed: {e}")
+            logger.debug(traceback.format_exc())
 
             with open("debug_error.log", "w") as f:
-                f.write(error_msg)
+                f.write(str(e))
 
             return None, "image"
 
@@ -123,7 +117,7 @@ class MediaEngine:
             return abs_output_path
 
         except Exception as e:
-            print(f"Audio generation failed: {e}")
+            logger.error(f"Audio generation failed: {e}")
             return None
 
     # ---------------- VIDEO GENERATION ----------------

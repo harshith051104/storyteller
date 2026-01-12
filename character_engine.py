@@ -41,6 +41,9 @@ from config import MODEL_FAST
 from langchain_groq import ChatGroq
 from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
+from logger_config import get_logger
+
+logger = get_logger()
 
 class CharacterIdentity(BaseModel):
     name: str = Field(description="A culturally appropriate name for the protagonist")
@@ -64,7 +67,7 @@ class CharacterEngine:
             data = self.parser.parse(response.content)
             return data["name"], data["culture_label"]
         except Exception as e:
-            print(f"Identity Generation Failed: {e}")
+            logger.error(f"Identity Generation Failed: {e}")
             return "Protagonist", theme_input.title()
 
     def initialize_character(self, name, culture_input):

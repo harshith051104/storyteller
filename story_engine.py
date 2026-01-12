@@ -4,6 +4,9 @@ from pydantic import BaseModel, Field
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from culture_engine import CultureEngine
+from logger_config import get_logger
+
+logger = get_logger()
 
 class StoryOutput(BaseModel):
     story_text: str = Field(description="The narrative content (100-150 words) with choices at the end")
@@ -40,7 +43,7 @@ class StoryTeller:
                 recent_history = self.history[-keep_count:]
                 self.history = [self.history[0]] + recent_history
         except Exception as e:
-            print(f"History Trimming Error: {e}")
+            logger.warning(f"History Trimming Error: {e}")
             # Fallback: Just keep explicit last 5
             if len(self.history) > 5:
                 self.history = [self.history[0]] + self.history[-5:]
@@ -50,7 +53,7 @@ class StoryTeller:
         self.set_language(language)
         
         # 1. Retrieve Cultural Context (RAG)
-        print(f"Retrieving cultural context for: {theme}")
+        logger.info(f"Retrieving cultural context for: {theme}")
         context_str = self.culture_engine.get_context_string(theme)
         
         if context_str:
@@ -89,7 +92,7 @@ class StoryTeller:
             parsed_response = self.parser.parse(response.content)
             return parsed_response
         except Exception as e:
-            print(f"Story Start Error: {e}")
+            logger.error(f"Story Start Error: {e}")
             # Fallback
             return {
                 "story_text": f"The story begins with {theme}. (Error generating full story)",
@@ -108,7 +111,7 @@ class StoryTeller:
             parsed_response = self.parser.parse(response.content)
             return parsed_response
         except Exception as e:
-            print(f"Story Continue Error: {e}")
+            logger.error(f"Story Continue Error: {e}")
             return {
                 "story_text": "The story continues... (Error generating segment)",
                 "emotion": "neutral",

@@ -2,6 +2,19 @@ import gradio as gr
 import time
 import os
 from dotenv import load_dotenv
+from logger_config import setup_logger, get_logger
+
+# 1. Setup Professional Logging (Must be first)
+setup_logger()
+logger = get_logger()
+
+# 2. Startup Banner
+logger.info("---------------------------------------------------------------")
+logger.info("   📖 SMART CULTURAL STORYTELLER 2.0")
+logger.info("   Research-Grade Engine | Python 3.11 | Groq | MediaPipe")
+logger.info("---------------------------------------------------------------")
+logger.info("System initializing...")
+
 from story_engine import StoryTeller
 from media_engine import MediaEngine
 from character_engine import CharacterEngine, Character
@@ -13,7 +26,7 @@ load_dotenv()
 
 # Initialize Engines
 if not os.getenv("GOOGLE_API_KEY"):
-    print("ERROR: GOOGLE_API_KEY not found.")
+    logger.error("GOOGLE_API_KEY not found.")
     exit(1)
 
 story_teller = StoryTeller()
@@ -21,9 +34,13 @@ media_engine = MediaEngine()
 character_engine = CharacterEngine()
 try:
     emotion_engine = EmotionEngine()
+    if emotion_engine.detector is None:
+         logger.warning("Emotion Engine initialized but detector is None.")
 except Exception as e:
-    print(f"Warning: Emotion Engine failed to load ({e}). Face detection disabled.")
+    logger.warning(f"Emotion Engine failed to load ({e}). Face detection disabled.")
     emotion_engine = None
+
+logger.info("Engine validation complete. Launching UI...")
 
 def start_story_handler(theme, language, history_state):
     try:
@@ -74,7 +91,7 @@ def start_story_handler(theme, language, history_state):
         )
 
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error(f"Error in start_story_handler: {e}")
         yield f"Error: {e}", None, None, None, "", ""
 
 
@@ -164,7 +181,7 @@ def continue_story_handler(user_choice, user_emotion_label, state):
         yield story_text, audio, image_update, state, moral_display, status_msg
 
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error(f"Error in continue_story_handler: {e}")
         yield f"Error: {e}", None, None, state, "", ""
 
 
@@ -232,4 +249,5 @@ with gr.Blocks(title="Smart Cultural Storyteller") as demo:
     )
 
 if __name__ == "__main__":
-    demo.launch(theme=gr.themes.Soft())
+    logger.info("Starting Web Server at http://127.0.0.1:7860...")
+    demo.launch(theme=gr.themes.Soft(), quiet=True) # quiet to suppress some Gradio logs

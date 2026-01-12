@@ -3,6 +3,9 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import numpy as np
 import os
+from logger_config import get_logger
+
+logger = get_logger()
 
 class EmotionEngine:
     def __init__(self, model_path="face_landmarker.task"):
@@ -11,7 +14,7 @@ class EmotionEngine:
         """
         try:
             if not os.path.exists(model_path):
-                print(f"Warning: Model file '{model_path}' not found. Emotion detection disabled.")
+                logger.warning(f"Model file '{model_path}' not found. Emotion detection disabled.")
                 self.detector = None
                 return
 
@@ -23,9 +26,9 @@ class EmotionEngine:
                 num_faces=1
             )
             self.detector = vision.FaceLandmarker.create_from_options(options)
-            print("EmotionEngine (FaceLandmarker) initialized successfully.")
+            logger.info("EmotionEngine (FaceLandmarker) initialized successfully.")
         except Exception as e:
-            print(f"Error initializing EmotionEngine: {e}")
+            logger.error(f"Error initializing EmotionEngine: {e}")
             self.detector = None
 
     def detect_emotion(self, image):
@@ -73,7 +76,7 @@ class EmotionEngine:
             if best_score < 0.3: # If signals are weak, default to neutral
                 return {"emotion": "neutral", "confidence": round(1.0 - best_score, 2)}
             
-            print(f"[EmotionEngine] Detected emotion: {best_emotion} (confidence={best_score:.2f})")
+            logger.info(f"Detected emotion: {best_emotion} (confidence={best_score:.2f})")
             
             return {
                 "emotion": best_emotion,
@@ -81,5 +84,5 @@ class EmotionEngine:
             }
 
         except Exception as e:
-            print(f"Emotion detection runtime error: {e}")
+            logger.debug(f"Emotion detection runtime error: {e}")
             return {"emotion": "neutral", "confidence": 0.0}

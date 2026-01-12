@@ -1,6 +1,9 @@
 from config import MODEL_FAST
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
+from logger_config import get_logger
+
+logger = get_logger()
 
 class CultureEngine:
     def __init__(self):
@@ -14,7 +17,7 @@ class CultureEngine:
         if not theme:
             return ""
 
-        print(f"CultureEngine: Generatively recalling facts for '{theme}'...")
+        logger.info(f"CultureEngine: Generatively recalling facts for '{theme}'...")
         
         system_prompt = (
             "You are an expert Cultural Anthropologist and Mythologist with encyclopedic knowledge of world cultures, "
@@ -40,7 +43,7 @@ class CultureEngine:
             response = self.llm.invoke(messages)
             return response.content
         except Exception as e:
-            print(f"Culture Generation Failed: {e}")
+            logger.error(f"Culture Generation Failed: {e}")
             return "General cultural knowledge applies."
 
 if __name__ == "__main__":

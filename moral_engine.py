@@ -2,8 +2,10 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
-
 from config import MODEL_FAST, MORAL_SCORE_MIN, MORAL_SCORE_MAX
+from logger_config import get_logger
+
+logger = get_logger()
 
 class MoralScore(BaseModel):
     compassion: int = Field(description="Change in compassion score (-5 to +5)")
@@ -43,7 +45,7 @@ class MoralEngine:
             
             return result
         except Exception as e:
-            print(f"Moral Engine Error: {e}")
+            logger.error(f"Moral Engine Error: {e}")
             return None
 
     def generate_reflection(self):

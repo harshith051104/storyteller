@@ -1,7 +1,9 @@
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
-
 from config import MODEL_FAST
+from logger_config import get_logger
+
+logger = get_logger()
 
 class CinematographyEngine:
     def __init__(self):
@@ -33,6 +35,6 @@ class CinematographyEngine:
             result = chain.invoke({"story": story_segment, "emotion": emotion})
             return result.content.strip()
         except Exception as e:
-            print(f"Cinematography Engine Error: {e}")
+            logger.error(f"Cinematography Engine Error: {e}")
             # Fallback if LLM fails
             return f"cinematic shot, {emotion} lighting, 8k resolution"
